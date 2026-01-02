@@ -27,30 +27,39 @@ public class PlaceholderReplacer {
             return text;
         }
 
-        // Resolve player name from UUID
-        String playerName = resolvePlayerName(entry.getUuid(), server);
-        String playerUuid = entry.getUuid() != null ? entry.getUuid() : "Unknown";
+        // Only resolve player name if needed (expensive operation)
+        if (text.contains("%player%") || text.contains("%player_name%")) {
+            String playerName = resolvePlayerName(entry.getUuid(), server);
+            text = text.replace("%player%", playerName)
+                       .replace("%player_name%", playerName);
+        }
 
-        // Resolve executor UUID - use helper to return UUID without dashes or console UUID
-        String executorUuid = resolveExecutorUuid(entry.getExecutorUUID());
+        // Only resolve player UUID if needed
+        if (text.contains("%player_uuid%")) {
+            String playerUuid = entry.getUuid() != null ? entry.getUuid() : "Unknown";
+            text = text.replace("%player_uuid%", playerUuid);
+        }
 
-        return text
-            .replace("%player%", playerName)
-            .replace("%player_name%", playerName)
-            .replace("%player_uuid%", playerUuid)
-            .replace("%executor%", entry.getExecutorName() != null ? entry.getExecutorName() : "Console")
-            .replace("%executor_name%", entry.getExecutorName() != null ? entry.getExecutorName() : "Console")
-            .replace("%executor_uuid%", executorUuid)
+        // Only resolve executor UUID if needed (expensive operation with logging)
+        if (text.contains("%executor_uuid%")) {
+            String executorUuid = resolveExecutorUuid(entry.getExecutorUUID());
+            text = text.replace("%executor_uuid%", executorUuid);
+        }
+
+        // Executor name placeholders
+        if (text.contains("%executor%") || text.contains("%executor_name%")) {
+            String executorName = entry.getExecutorName() != null ? entry.getExecutorName() : "Console";
+            text = text.replace("%executor%", executorName)
+                       .replace("%executor_name%", executorName);
+        }
+
+        // Simple placeholders (cheap operations)
+        text = text
             .replace("%reason%", entry.getReason() != null ? entry.getReason() : "No reason specified")
             .replace("%type%", entry.getType() != null ? entry.getType() : "Unknown")
-            .replace("%duration%", formatDuration(entry.getRemainingDuration(System.currentTimeMillis())))
-            .replace("%duration_original%", formatDuration(entry.getDuration()))
             .replace("%server%", entry.getServerOrigin() != null ? entry.getServerOrigin() : "Unknown")
             .replace("%server_origin%", entry.getServerOrigin() != null ? entry.getServerOrigin() : "Unknown")
             .replace("%server_scope%", entry.getServerScope() != null ? entry.getServerScope() : "Global")
-            .replace("%date%", formatDate(entry.getDateStart()))
-            .replace("%date_start%", formatDate(entry.getDateStart()))
-            .replace("%date_end%", formatDate(entry.getDateEnd()))
             .replace("%ip%", entry.getIp() != null ? entry.getIp() : "Unknown")
             .replace("%ip_address%", entry.getIp() != null ? entry.getIp() : "Unknown")
             .replace("%id%", String.valueOf(entry.getId()))
@@ -58,6 +67,26 @@ public class PlaceholderReplacer {
             .replace("%permanent%", String.valueOf(entry.isPermanent()))
             .replace("%silent%", String.valueOf(entry.isSilent()))
             .replace("%ipban%", String.valueOf(entry.isIpban()));
+
+        // Duration placeholders (potentially expensive)
+        if (text.contains("%duration%")) {
+            text = text.replace("%duration%", formatDuration(entry.getRemainingDuration(System.currentTimeMillis())));
+        }
+        if (text.contains("%duration_original%")) {
+            text = text.replace("%duration_original%", formatDuration(entry.getDuration()));
+        }
+
+        // Date placeholders (potentially expensive)
+        if (text.contains("%date%") || text.contains("%date_start%")) {
+            String dateStart = formatDate(entry.getDateStart());
+            text = text.replace("%date%", dateStart)
+                       .replace("%date_start%", dateStart);
+        }
+        if (text.contains("%date_end%")) {
+            text = text.replace("%date_end%", formatDate(entry.getDateEnd()));
+        }
+
+        return text;
     }
 
     /**
