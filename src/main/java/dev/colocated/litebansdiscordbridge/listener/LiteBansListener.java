@@ -36,8 +36,9 @@ public class LiteBansListener extends Events.Listener {
             return;
         }
 
-        String webhookUrl = plugin.getConfigManager().getString("webhook-url", "");
-        if (webhookUrl.isEmpty()) {
+        // Try to get event-specific webhook URL first, then fall back to global
+        String webhookUrl = getWebhookUrl(eventConfig);
+        if (webhookUrl == null || webhookUrl.isEmpty()) {
             plugin.getLogger().warn("Webhook URL is not configured!");
             return;
         }
@@ -53,6 +54,48 @@ public class LiteBansListener extends Events.Listener {
     @Override
     public void broadcastSent(String message, String type) {
         // Not needed for this plugin
+    }
+
+    /**
+     * Gets the webhook URL for the event, with fallback to global webhook URL.
+     * Validates that the URL is a valid HTTPS URL.
+     *
+     * @param eventConfig The event configuration node
+     * @return The webhook URL to use, or null if no valid URL is configured
+     */
+    private String getWebhookUrl(CommentedConfigurationNode eventConfig) {
+        // Try to get event-specific webhook URL
+        String eventWebhookUrl = eventConfig.node("webhook-url").getString("");
+
+        // If event-specific webhook URL exists and is valid, use it
+        if (!eventWebhookUrl.isEmpty() && isValidWebhookUrl(eventWebhookUrl)) {
+            return eventWebhookUrl;
+        }
+
+        // Fall back to global webhook URL
+        String globalWebhookUrl = plugin.getConfigManager().getString("webhook-url", "");
+
+        // Validate global webhook URL
+        if (!globalWebhookUrl.isEmpty() && isValidWebhookUrl(globalWebhookUrl)) {
+            return globalWebhookUrl;
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates that a webhook URL is a valid HTTPS URL.
+     *
+     * @param url The URL to validate
+     * @return true if the URL is a valid HTTPS URL, false otherwise
+     */
+    private boolean isValidWebhookUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+
+        // Check if URL starts with https://
+        return url.toLowerCase().startsWith("https://");
     }
 
     private void sendDiscordNotification(Entry entry, CommentedConfigurationNode config, String webhookUrl) {

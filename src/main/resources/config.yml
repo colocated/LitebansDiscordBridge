@@ -14,6 +14,12 @@
 #   When enabled, shows the punishment date as a relative time in Discord
 #   (e.g., "5 minutes ago") and makes it searchable. No need to add %date% to footer.
 #
+# Webhook URLs:
+#   You can set a global webhook URL below, or override it for specific event types.
+#   Event-specific webhook URLs are set in each event's configuration using "webhook-url: "..."
+#   If an event-specific URL is not set or invalid, it will fall back to the global webhook URL.
+#   All webhook URLs must be valid HTTPS URLs.
+#
 # Placeholders available for all messages:
 #   %player% / %player_name% / %player_uuid% - The punished player
 #   %executor% / %executor_name% / %executor_uuid% - Who issued the punishment
@@ -32,13 +38,17 @@
 #   %silent% - Whether the punishment was silent (true/false)
 #   %ipban% - Whether the punishment is an IP ban (true/false)
 
-# Discord webhook URL - Get this from your Discord server settings
+# Global Discord webhook URL - Get this from your Discord server settings
+# This is used as the default for all events unless overridden in the event configuration
 webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
 
 # Event configurations - Delete or comment out entire event blocks to disable them
 events:
   # Ban event - Comment out this entire section to disable ban notifications
   ban:
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_BAN_WEBHOOK_ID/YOUR_BAN_WEBHOOK_TOKEN"
+
     # Optional content message (appears above embed) - Leave empty or delete this line if not needed
     content: ""
     embed:
@@ -114,6 +124,9 @@ events:
 
   # Mute event - Comment out this entire section to disable mute notifications
   mute:
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_MUTE_WEBHOOK_ID/YOUR_MUTE_WEBHOOK_TOKEN"
+
     content: ""
     embed:
       title: "Player Muted"
@@ -159,6 +172,9 @@ events:
 
   # Warn event - Comment out this entire section to disable warn notifications
   warn:
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_WARN_WEBHOOK_ID/YOUR_WARN_WEBHOOK_TOKEN"
+
     content: ""
     embed:
       title: "Player Warned"
@@ -198,6 +214,9 @@ events:
 
   # Kick event - Comment out this entire section to disable kick notifications
   kick:
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_KICK_WEBHOOK_ID/YOUR_KICK_WEBHOOK_TOKEN"
+
     content: ""
     embed:
       title: "Player Kicked"
