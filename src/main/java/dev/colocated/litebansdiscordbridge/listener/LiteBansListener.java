@@ -36,6 +36,12 @@ public class LiteBansListener extends Events.Listener {
             return;
         }
 
+        // Check if the event is enabled - require explicit enabled: true
+        boolean enabled = eventConfig.node("enabled").getBoolean(false);
+        if (!enabled) {
+            return;
+        }
+
         // Try to get event-specific webhook URL first, then fall back to global
         String webhookUrl = getWebhookUrl(eventConfig);
         if (webhookUrl == null || webhookUrl.isEmpty()) {

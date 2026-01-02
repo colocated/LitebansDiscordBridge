@@ -1,6 +1,10 @@
 # LiteBansDiscordBridge Configuration
 #
-# To disable an event type, simply comment out or delete the entire section.
+# Enabling/Disabling Events:
+#   Each event type requires "enabled: true" to send notifications.
+#   Set "enabled: false" or remove the enabled field to disable an event.
+#   You can also comment out or delete the entire event section to disable it.
+#
 # To disable optional features (author, thumbnail, footer, etc.), comment out or delete those blocks.
 # To remove a field, just delete that line from the fields list.
 #
@@ -44,8 +48,10 @@ webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKE
 
 # Event configurations - Delete or comment out entire event blocks to disable them
 events:
-  # Ban event - Comment out this entire section to disable ban notifications
+  # Ban event - Set enabled to false or delete this section to disable ban notifications
   ban:
+    enabled: true
+
     # Optional: Override the global webhook URL for this event only
     # webhook-url: "https://discord.com/api/webhooks/YOUR_BAN_WEBHOOK_ID/YOUR_BAN_WEBHOOK_TOKEN"
 
@@ -122,8 +128,10 @@ events:
           value: "#%id%"
           inline: true
 
-  # Mute event - Comment out this entire section to disable mute notifications
+  # Mute event - Set enabled to false or delete this section to disable mute notifications
   mute:
+    enabled: true
+
     # Optional: Override the global webhook URL for this event only
     # webhook-url: "https://discord.com/api/webhooks/YOUR_MUTE_WEBHOOK_ID/YOUR_MUTE_WEBHOOK_TOKEN"
 
@@ -170,8 +178,10 @@ events:
           value: "#%id%"
           inline: true
 
-  # Warn event - Comment out this entire section to disable warn notifications
+  # Warn event - Set enabled to false or delete this section to disable warn notifications
   warn:
+    enabled: true
+
     # Optional: Override the global webhook URL for this event only
     # webhook-url: "https://discord.com/api/webhooks/YOUR_WARN_WEBHOOK_ID/YOUR_WARN_WEBHOOK_TOKEN"
 
@@ -212,8 +222,10 @@ events:
           value: "#%id%"
           inline: true
 
-  # Kick event - Comment out this entire section to disable kick notifications
+  # Kick event - Set enabled to false or delete this section to disable kick notifications
   kick:
+    enabled: true
+
     # Optional: Override the global webhook URL for this event only
     # webhook-url: "https://discord.com/api/webhooks/YOUR_KICK_WEBHOOK_ID/YOUR_KICK_WEBHOOK_TOKEN"
 
