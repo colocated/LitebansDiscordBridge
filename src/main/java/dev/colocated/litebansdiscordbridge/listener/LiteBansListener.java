@@ -54,7 +54,52 @@ public class LiteBansListener extends Events.Listener {
 
     @Override
     public void entryRemoved(Entry entry) {
-        // Not needed for this plugin
+        if (entry == null) {
+            return;
+        }
+
+        String type = entry.getType();
+        if (type == null) {
+            return;
+        }
+
+        // Map entry types to unban/unmute event types
+        String eventType;
+        switch (type.toLowerCase()) {
+            case "ban":
+                eventType = "unban";
+                break;
+            case "mute":
+                eventType = "unmute";
+                break;
+            default:
+                // Only handle unban and unmute for now
+                return;
+        }
+
+        String configPath = "events." + eventType;
+
+        CommentedConfigurationNode eventConfig = plugin.getConfigManager().getNode(configPath);
+
+        // If the event config doesn't exist, it's disabled
+        if (eventConfig.virtual()) {
+            return;
+        }
+
+        // Check if the event is enabled - require explicit enabled: true
+        boolean enabled = eventConfig.node("enabled").getBoolean(false);
+        if (!enabled) {
+            return;
+        }
+
+        // Try to get event-specific webhook URL first, then fall back to global
+        String webhookUrl = getWebhookUrl(eventConfig);
+        if (webhookUrl == null || webhookUrl.isEmpty()) {
+            plugin.getLogger().warn("Webhook URL is not configured!");
+            return;
+        }
+
+        sendDiscordNotification(entry, eventConfig, webhookUrl);
     }
 
     @Override

@@ -265,3 +265,97 @@ events:
         - name: "Punishment ID"
           value: "#%id%"
           inline: true
+
+  # Unban event - Set enabled to false or delete this section to disable unban notifications
+  unban:
+    enabled: true
+
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_UNBAN_WEBHOOK_ID/YOUR_UNBAN_WEBHOOK_TOKEN"
+
+    content: ""
+    embed:
+      title: "Player Unbanned"
+      description: "**%player%** has been unbanned."
+      url: ""
+      color: "#00FF00"
+      timestamp: true
+
+      author:
+        name: "%executor%"
+        url: ""
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
+
+      thumbnail:
+        url: "https://api.mineatar.io/head/%player_uuid%"
+
+      footer:
+        text: "LiteBans"
+        icon-url: ""
+
+      fields:
+        - name: "Player"
+          value: "%player%"
+          inline: true
+        - name: "Unbanned by"
+          value: "%executor%"
+          inline: true
+        - name: "Reason"
+          value: "%reason%"
+          inline: false
+        - name: "Server"
+          value: "%server_origin%"
+          inline: true
+        - name: "Scope"
+          value: "%server_scope%"
+          inline: true
+        - name: "Punishment ID"
+          value: "#%id%"
+          inline: true
+
+  # Unmute event - Set enabled to false or delete this section to disable unmute notifications
+  unmute:
+    enabled: true
+
+    # Optional: Override the global webhook URL for this event only
+    # webhook-url: "https://discord.com/api/webhooks/YOUR_UNMUTE_WEBHOOK_ID/YOUR_UNMUTE_WEBHOOK_TOKEN"
+
+    content: ""
+    embed:
+      title: "Player Unmuted"
+      description: "**%player%** has been unmuted."
+      url: ""
+      color: "#00FF00"
+      timestamp: true
+
+      author:
+        name: "%executor%"
+        url: ""
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
+
+      thumbnail:
+        url: "https://api.mineatar.io/head/%player_uuid%"
+
+      footer:
+        text: "LiteBans"
+        icon-url: ""
+
+      fields:
+        - name: "Player"
+          value: "%player%"
+          inline: true
+        - name: "Unmuted by"
+          value: "%executor%"
+          inline: true
+        - name: "Reason"
+          value: "%reason%"
+          inline: false
+        - name: "Server"
+          value: "%server_origin%"
+          inline: true
+        - name: "Scope"
+          value: "%server_scope%"
+          inline: true
+        - name: "Punishment ID"
+          value: "#%id%"
+          inline: true
