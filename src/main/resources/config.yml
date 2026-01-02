@@ -80,11 +80,11 @@ events:
       author:
         name: "%executor%"
         url: ""
-        icon-url: "https://crafatar.com/avatars/%executor_uuid%?overlay"
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
 
       # Thumbnail (small image on top right) - Delete this block to remove thumbnail
       thumbnail:
-        url: "https://crafatar.com/avatars/%player_uuid%?overlay"
+        url: "https://api.mineatar.io/head/%player_uuid%"
 
       # Large image - Uncomment and configure to add a large image
       # image:
@@ -146,10 +146,10 @@ events:
       author:
         name: "%executor%"
         url: ""
-        icon-url: "https://crafatar.com/avatars/%executor_uuid%?overlay"
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
 
       thumbnail:
-        url: "https://crafatar.com/avatars/%player_uuid%?overlay"
+        url: "https://api.mineatar.io/head/%player_uuid%"
 
       footer:
         text: "LiteBans"
@@ -196,10 +196,10 @@ events:
       author:
         name: "%executor%"
         url: ""
-        icon-url: "https://crafatar.com/avatars/%executor_uuid%?overlay"
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
 
       thumbnail:
-        url: "https://crafatar.com/avatars/%player_uuid%?overlay"
+        url: "https://api.mineatar.io/head/%player_uuid%"
 
       footer:
         text: "LiteBans"
@@ -240,10 +240,10 @@ events:
       author:
         name: "%executor%"
         url: ""
-        icon-url: "https://crafatar.com/avatars/%executor_uuid%?overlay"
+        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
 
       thumbnail:
-        url: "https://crafatar.com/avatars/%player_uuid%?overlay"
+        url: "https://api.mineatar.io/head/%player_uuid%"
 
       footer:
         text: "LiteBans"
