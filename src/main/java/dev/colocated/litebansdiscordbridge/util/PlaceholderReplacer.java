@@ -10,7 +10,11 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PlaceholderReplacer {
+    private static final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final String CONSOLE_UUID = "f78a4d8dd51b4b3998a3230f2de0c670";
 
@@ -74,6 +78,7 @@ public class PlaceholderReplacer {
             UUID uuid = UUID.fromString(formatted);
             return uuid.toString().replace("-", "");
         } catch (IllegalArgumentException e) {
+            logger.warn("Invalid executor UUID format: {}, defaulting to console...", rawExecutor);
             return CONSOLE_UUID;
         }
     }
@@ -101,6 +106,7 @@ public class PlaceholderReplacer {
                 return player.get().getUsername();
             }
         } catch (IllegalArgumentException e) {
+            logger.warn("Invalid UUID format: {}", uuidString);
             return "Unknown";
         }
 
