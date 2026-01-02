@@ -63,10 +63,14 @@ public class PlaceholderReplacer {
             .replace("%ip%", entry.getIp() != null ? entry.getIp() : "Unknown")
             .replace("%ip_address%", entry.getIp() != null ? entry.getIp() : "Unknown")
             .replace("%id%", String.valueOf(entry.getId()))
+            .replace("%id_random%", entry.getRandomID() != null ? entry.getRandomID() : String.valueOf(entry.getId()))
             .replace("%active%", String.valueOf(entry.isActive()))
             .replace("%permanent%", String.valueOf(entry.isPermanent()))
             .replace("%silent%", String.valueOf(entry.isSilent()))
-            .replace("%ipban%", String.valueOf(entry.isIpban()));
+            .replace("%ipban%", String.valueOf(entry.isIpban()))
+            .replace("%removed_by_name%", String.valueOf(entry.getRemovedByName()))
+            .replace("%removed_by_uuid%", String.valueOf(entry.getRemovedByUUID()))
+            .replace("%removed_reason%", String.valueOf(entry.getRemovalReason()));
 
         // Duration placeholders (potentially expensive)
         if (text.contains("%duration%")) {

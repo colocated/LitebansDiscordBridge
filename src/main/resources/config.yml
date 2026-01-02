@@ -37,10 +37,14 @@
 #   %date_end% - When the punishment expires
 #   %ip% / %ip_address% - The IP address of the punished player
 #   %id% - The punishment ID
+#   %id_random% - The random punishment ID (e.g., 4AC6DA)
 #   %active% - Whether the punishment is active (true/false)
 #   %permanent% - Whether the punishment is permanent (true/false)
 #   %silent% - Whether the punishment was silent (true/false)
 #   %ipban% - Whether the punishment is an IP ban (true/false)
+#   %removed_by_name% - Who removed the punishment (for unban/unmute events)
+#   %removed_by_uuid% - UUID of who removed the punishment (for unban/unmute events)
+#   %removed_reason% - Reason for removing the punishment (for unban/unmute events)
 
 # Global Discord webhook URL - Get this from your Discord server settings
 # This is used as the default for all events unless overridden in the event configuration
@@ -282,9 +286,9 @@ events:
       timestamp: true
 
       author:
-        name: "%executor%"
+        name: "%removed_by_name%"
         url: ""
-        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
+        icon-url: "https://api.mineatar.io/head/%removed_by_uuid%"
 
       thumbnail:
         url: "https://api.mineatar.io/head/%player_uuid%"
@@ -298,9 +302,12 @@ events:
           value: "%player%"
           inline: true
         - name: "Unbanned by"
-          value: "%executor%"
+          value: "%removed_by_name%"
           inline: true
-        - name: "Reason"
+        - name: "Removal Reason"
+          value: "%removed_reason%"
+          inline: false
+        - name: "Original Ban Reason"
           value: "%reason%"
           inline: false
         - name: "Server"
@@ -329,9 +336,9 @@ events:
       timestamp: true
 
       author:
-        name: "%executor%"
+        name: "%removed_by_name%"
         url: ""
-        icon-url: "https://api.mineatar.io/head/%executor_uuid%"
+        icon-url: "https://api.mineatar.io/head/%removed_by_uuid%"
 
       thumbnail:
         url: "https://api.mineatar.io/head/%player_uuid%"
@@ -345,9 +352,12 @@ events:
           value: "%player%"
           inline: true
         - name: "Unmuted by"
-          value: "%executor%"
+          value: "%removed_by_name%"
           inline: true
-        - name: "Reason"
+        - name: "Removal Reason"
+          value: "%removed_reason%"
+          inline: false
+        - name: "Original Mute Reason"
           value: "%reason%"
           inline: false
         - name: "Server"

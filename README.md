@@ -68,10 +68,14 @@ All messages support the following placeholders:
 | `%date_end%` | When the punishment expires |
 | `%ip%` / `%ip_address%` | The IP address of the punished player |
 | `%id%` | The punishment ID |
+| `%id_random%` | The punishment ID with random salting (e.g., 4AC6DA) (output configured by Litebans) |
 | `%active%` | Whether the punishment is active (true/false) |
 | `%permanent%` | Whether the punishment is permanent (true/false) |
 | `%silent%` | Whether the punishment was silent (true/false) |
 | `%ipban%` | Whether the punishment is an IP ban (true/false) |
+| `%removed_by_name%` | Who removed the punishment (for unban/unmute events) |
+| `%removed_by_uuid%` | UUID of who removed the punishment (for unban/unmute events) |
+| `%removed_reason%` | Reason for removing the punishment (for unban/unmute events) |
 
 ### Customization Options
 
