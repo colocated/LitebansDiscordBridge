@@ -1,0 +1,7 @@
+name: LiteBansDiscordBridge
+version: '${project.version}'
+main: dev.colocated.litebansdiscordbridge.bungeecord.LiteBansDiscordBridgeBungee
+author: colocated
+description: Sends LiteBans events to Discord webhooks
+depends:
+  - litebans
