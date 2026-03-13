@@ -1,0 +1,24 @@
+name: LiteBansDiscordBridge
+version: '${project.version}'
+main: dev.colocated.litebansdiscordbridge.bukkit.LiteBansDiscordBridgeBukkit
+description: Sends LiteBans events to Discord webhooks
+authors:
+  - colocated
+# api-version tells Paper/Spigot 1.13+ which API level this plugin targets.
+# Servers older than 1.13 ignore this field entirely.
+api-version: '1.13'
+depend:
+  - litebans
+commands:
+  litebansdiscord:
+    description: LiteBansDiscordBridge management command
+    usage: /<command> reload
+    aliases: [ldb, litebansbridge]
+    permission: litebansdiscord.command
+permissions:
+  litebansdiscord.command:
+    description: Allows use of the /litebansdiscord command
+    default: op
+  litebansdiscord.reload:
+    description: Allows reloading the configuration
+    default: op
