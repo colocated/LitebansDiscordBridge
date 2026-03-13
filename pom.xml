@@ -5,17 +5,31 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.colocated</groupId>
-    <artifactId>litebansdiscordbridge</artifactId>
+    <artifactId>litebansdiscordbridge-parent</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>LiteBansDiscordBridge</name>
-    <description>Velocity plugin to send LiteBans events to Discord webhooks</description>
+    <description>Multi-platform LiteBans to Discord webhook bridge</description>
+
+    <modules>
+        <module>core</module>
+        <module>bukkit</module>
+        <module>velocity</module>
+        <module>bungeecord</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <!-- Default: Java 8 bytecode for broadest compatibility (1.8.8–1.21.x, all proxies) -->
+        <java.version>8</java.version>
+        <!-- Appended to JAR filename; overridden to '-modern' in the modern profile -->
+        <jar.suffix></jar.suffix>
+        <!-- Shared dependency versions -->
+        <okhttp.version>4.12.0</okhttp.version>
+        <gson.version>2.10.1</gson.version>
+        <configurate.version>4.1.2</configurate.version>
+        <litebans.version>0.6.0</litebans.version>
     </properties>
 
     <repositories>
@@ -27,110 +41,137 @@
             <id>codemc</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>spigotmc-snapshots</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
-    <dependencies>
-        <!-- Velocity API -->
-        <dependency>
-            <groupId>com.velocitypowered</groupId>
-            <artifactId>velocity-api</artifactId>
-            <version>3.4.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- LiteBans API -->
-        <dependency>
-            <groupId>litebans</groupId>
-            <artifactId>api</artifactId>
-            <version>0.6.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Configuration library (Configurate) -->
-        <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-yaml</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-
-        <!-- HTTP client for Discord webhooks -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.12.0</version>
-        </dependency>
-
-        <!-- Gson for JSON -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Core module -->
+            <dependency>
+                <groupId>dev.colocated</groupId>
+                <artifactId>litebansdiscordbridge-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- LiteBans API — same JAR across all platforms -->
+            <dependency>
+                <groupId>litebans</groupId>
+                <artifactId>api</artifactId>
+                <version>${litebans.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- Shaded libraries (compile scope — included in fat JARs) -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.spongepowered</groupId>
+                <artifactId>configurate-yaml</artifactId>
+                <version>${configurate.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
-        <finalName>${project.name}-${project.version}</finalName>
         <defaultGoal>clean package</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <relocations>
-                                <relocation>
-                                    <pattern>okhttp3</pattern>
-                                    <shadedPattern>dev.colocated.litebansdiscordbridge.libs.okhttp3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>okio</pattern>
-                                    <shadedPattern>dev.colocated.litebansdiscordbridge.libs.okio</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.gson</pattern>
-                                    <shadedPattern>dev.colocated.litebansdiscordbridge.libs.gson</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.spongepowered.configurate</pattern>
-                                    <shadedPattern>dev.colocated.litebansdiscordbridge.libs.configurate</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.5.0</version>
+                    <configuration>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>META-INF/MANIFEST.MF</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <relocations>
+                            <relocation>
+                                <pattern>okhttp3</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.okhttp3</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>okio</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.okio</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>kotlin</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.kotlin</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>org.jetbrains</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.jetbrains</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>com.google.gson</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.gson</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>org.spongepowered.configurate</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.configurate</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>io.leangen.geantyref</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.geantyref</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>org.yaml.snakeyaml</pattern>
+                                <shadedPattern>dev.colocated.litebansdiscordbridge.libs.snakeyaml</shadedPattern>
+                            </relocation>
+                        </relocations>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
+    <!--
+        Build profiles:
+          (default)  — Java 8 bytecode. Runs on any server from 1.8.8 through 1.21.x.
+          modern     — Java 21 bytecode. For environments guaranteed to run Java 21+.
+
+        Usage:
+          mvn clean package           → produces *-java8 JARs
+          mvn clean package -P modern → produces *-modern JARs
+    -->
+    <profiles>
+        <profile>
+            <id>modern</id>
+            <properties>
+                <java.version>21</java.version>
+                <jar.suffix>-modern</jar.suffix>
+            </properties>
+        </profile>
+    </profiles>
 </project>
