@@ -1,0 +1,101 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.1)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to create a GitHub release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Java 21 is needed to compile both the default (java8 target) and
+      # the modern (java21 target) builds. Java 8 bytecode compiles fine
+      # under a Java 21 JDK.
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # Stamp all pom.xml files with the requested version, and update the
+      # Velocity @Plugin annotation (a Java string literal, not a resource file,
+      # so it is not processed by Maven resource filtering).
+      - name: Set project version
+        run: |
+          mvn --no-transfer-progress versions:set -DnewVersion=${{ inputs.version }} -DgenerateBackupPoms=false
+          sed -i 's/version = "[^"]*", \/\/ replaced by CI via sed during release builds/version = "${{ inputs.version }}", \/\/ replaced by CI via sed during release builds/' \
+            velocity/src/main/java/dev/colocated/litebansdiscordbridge/velocity/LiteBansDiscordBridgeVelocity.java
+
+      # -----------------------------------------------------------------------
+      # Java 8 build  (default profile — broadest compatibility, 1.8.8–1.21.x)
+      # -----------------------------------------------------------------------
+      - name: Build Java-8-target JARs
+        run: mvn --no-transfer-progress clean package -DskipTests
+
+      - name: Collect Java-8-target JARs
+        run: |
+          mkdir -p artifacts
+          cp bukkit/target/LiteBansDiscordBridge-bukkit-${{ inputs.version }}.jar \
+             artifacts/LiteBansDiscordBridge-bukkit-${{ inputs.version }}-java8.jar
+          cp velocity/target/LiteBansDiscordBridge-velocity-${{ inputs.version }}.jar \
+             artifacts/LiteBansDiscordBridge-velocity-${{ inputs.version }}-java8.jar
+          cp bungeecord/target/LiteBansDiscordBridge-bungeecord-${{ inputs.version }}.jar \
+             artifacts/LiteBansDiscordBridge-bungeecord-${{ inputs.version }}-java8.jar
+
+      # -----------------------------------------------------------------------
+      # Java 21 build  (modern profile — Java 21+ environments only)
+      # -----------------------------------------------------------------------
+      - name: Build Java-21-target JARs
+        run: mvn --no-transfer-progress clean package -P modern -DskipTests
+
+      - name: Collect Java-21-target JARs
+        run: |
+          cp bukkit/target/LiteBansDiscordBridge-bukkit-${{ inputs.version }}-modern.jar \
+             artifacts/LiteBansDiscordBridge-bukkit-${{ inputs.version }}-java21.jar
+          cp velocity/target/LiteBansDiscordBridge-velocity-${{ inputs.version }}-modern.jar \
+             artifacts/LiteBansDiscordBridge-velocity-${{ inputs.version }}-java21.jar
+          cp bungeecord/target/LiteBansDiscordBridge-bungeecord-${{ inputs.version }}-modern.jar \
+             artifacts/LiteBansDiscordBridge-bungeecord-${{ inputs.version }}-java21.jar
+
+      # -----------------------------------------------------------------------
+      # Create GitHub Release
+      # -----------------------------------------------------------------------
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: LiteBansDiscordBridge v${{ inputs.version }}
+          draft: false
+          prerelease: ${{ inputs.prerelease }}
+          body: |
+            ## LiteBansDiscordBridge v${{ inputs.version }}
+
+            ### Download
+            Pick the JAR for your platform and Java version:
+
+            | Platform | Java 8+ (recommended) | Java 21 |
+            |---|---|---|
+            | Bukkit / Spigot / Paper (1.8.8–1.21.x) | `*-bukkit-*-java8.jar` | `*-bukkit-*-java21.jar` |
+            | Velocity 3+ | `*-velocity-*-java8.jar` | `*-velocity-*-java21.jar` |
+            | BungeeCord | `*-bungeecord-*-java8.jar` | `*-bungeecord-*-java21.jar` |
+
+            > **java8** JARs run on any server regardless of Java version.
+            > **java21** JARs require a Java 21 runtime.
+          files: artifacts/*
