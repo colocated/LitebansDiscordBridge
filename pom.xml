@@ -82,6 +82,14 @@
                 <artifactId>configurate-yaml</artifactId>
                 <version>${configurate.version}</version>
             </dependency>
+            <!-- Pin SnakeYAML to the version Configurate 4.1.2 was compiled against.
+                 Without this, Maven may resolve SnakeYAML 2.x (e.g. from transitive deps),
+                 whose ParserImpl constructor signature changed, causing NoSuchMethodError. -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.33</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
