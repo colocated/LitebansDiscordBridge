@@ -9,7 +9,7 @@ authors:
   - colocated
 dependencies:
   server:
-    litebans:
+    LiteBans:
       load: BEFORE
       required: true
       join-classpath: true
