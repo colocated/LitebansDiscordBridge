@@ -1,6 +1,8 @@
 # LiteBansDiscordBridge
 
-A Velocity plugin that sends LiteBans punishment notifications to Discord webhooks with fully customizable embeds.
+A multi-platform plugin that sends LiteBans punishment notifications to Discord webhooks with fully customizable embeds.
+
+Supports **Bukkit / Spigot / Paper** (1.8.8–1.21.x), **Velocity 3+**, and **BungeeCord**.
 
 ## Features
 
@@ -12,34 +14,126 @@ A Velocity plugin that sends LiteBans punishment notifications to Discord webhoo
 
 ## Requirements
 
-- Velocity (API Version 3.4.0) or higher
-- LiteBans plugin with API access
-- Java 21
-- Maven (for building)
+| Platform | Minimum version | Java |
+|---|---|---|
+| Bukkit / Spigot / Paper | 1.8.8 | 8+ |
+| Velocity | 3.0 | 11+ |
+| BungeeCord | Any modern build | 8+ |
+
+LiteBans must be installed on the same server/proxy.
 
 ## Installation
 
-1. Install Maven (if not already installed):
-   ```bash
-   sdk install maven
-   ```
+### Option A — Download a release (recommended)
 
-2. Build the plugin:
-   ```bash
-   mvn clean package
-   ```
+1. Go to the [Releases](../../releases) page and download the JAR for your platform and Java version:
 
-3. The compiled JAR will be in `target/LiteBansDiscordBridge-1.0.0.jar`
+   | Platform | Java 8+ (recommended) | Java 21 only |
+   |---|---|---|
+   | Bukkit / Spigot / Paper | `*-bukkit-*-java8.jar` | `*-bukkit-*-java21.jar` |
+   | Velocity 3+ | `*-velocity-*-java8.jar` | `*-velocity-*-java21.jar` |
+   | BungeeCord | `*-bungeecord-*-java8.jar` | `*-bungeecord-*-java21.jar` |
 
-4. Copy the JAR to your Velocity `plugins/` folder
+   > The **java8** JARs run on any server regardless of Java version and are recommended for most users.
+   > The **java21** JARs require a Java 21 runtime but may have minor optimisations for modern servers.
 
-5. Restart your Velocity proxy
+2. Place the JAR in your server's `plugins/` folder.
 
-6. Configure the webhook URL in `plugins/litebansdiscordbridge/config.yml`
+3. Restart the server/proxy.
+
+4. Configure the webhook URL in `plugins/litebansdiscordbridge/config.yml`.
+
+### Option B — Build from source
+
+#### 1. Install prerequisites
+
+You need a **Java 8+ JDK** to build the java8 JARs, or a **Java 21 JDK** if you also want the java21 JARs. You also need **Maven 3.6+**.
+
+**Windows**
+
+Using [Chocolatey](https://chocolatey.org):
+```powershell
+choco install maven
+```
+
+Using [Scoop](https://scoop.sh):
+```powershell
+scoop install main/maven
+```
+
+Or download the Maven binary zip from [maven.apache.org](https://maven.apache.org/download.cgi), extract it, and add the `bin/` directory to your `PATH`.
+
+**macOS**
+
+Using [Homebrew](https://brew.sh):
+```bash
+brew install maven
+```
+
+Using [SDKMAN](https://sdkman.io):
+```bash
+sdk install maven
+```
+
+**Linux**
+
+Using SDKMAN (recommended — gets the latest version):
+```bash
+sdk install maven
+```
+
+Debian / Ubuntu:
+```bash
+sudo apt install maven
+```
+
+Fedora / RHEL:
+```bash
+sudo dnf install maven
+```
+
+#### 2. Clone and build
+
+```bash
+git clone https://github.com/colocated/LitebansDiscordBridge.git
+cd LitebansDiscordBridge
+```
+
+Build Java 8 JARs (broadest compatibility — runs on any server):
+```bash
+mvn clean package
+```
+
+Build Java 21 JARs (requires Java 21 JDK):
+```bash
+mvn clean package -P modern
+```
+
+#### 3. Locate the built JARs
+
+After a successful build, the JARs are in each platform's `target/` directory:
+
+| Platform | Java 8 JAR | Java 21 JAR |
+|---|---|---|
+| Bukkit / Spigot / Paper | `bukkit/target/LiteBansDiscordBridge-bukkit-{version}.jar` | `bukkit/target/LiteBansDiscordBridge-bukkit-{version}-modern.jar` |
+| Velocity | `velocity/target/LiteBansDiscordBridge-velocity-{version}.jar` | `velocity/target/LiteBansDiscordBridge-velocity-{version}-modern.jar` |
+| BungeeCord | `bungeecord/target/LiteBansDiscordBridge-bungeecord-{version}.jar` | `bungeecord/target/LiteBansDiscordBridge-bungeecord-{version}-modern.jar` |
+
+Copy the appropriate JAR to your server's `plugins/` folder and restart.
 
 ## Configuration
 
-The plugin creates a default configuration file at `plugins/litebansdiscordbridge/config.yml` on first run.
+The plugin creates a default configuration file on first run:
+
+- **Bukkit / Spigot / Paper**: `plugins/litebansdiscordbridge/config.yml`
+- **Velocity**: `plugins/litebansdiscordbridge/config.yml`
+- **BungeeCord**: `plugins/litebansdiscordbridge/config.yml`
+
+To reload the configuration without restarting, run:
+```
+/litebansdiscord reload
+```
+Aliases: `/ldb reload`, `/litebansbridge reload` (Bukkit/BungeeCord only)
 
 ### Setting up Discord Webhook
 
@@ -48,7 +142,7 @@ The plugin creates a default configuration file at `plugins/litebansdiscordbridg
 3. Click "New Webhook"
 4. Configure the webhook (name, channel, avatar)
 5. Copy the webhook URL
-6. Paste it in the `webhook-url` field in config.yml
+6. Paste it in the `webhook-url` field in `config.yml`
 
 ### Available Placeholders
 
@@ -68,7 +162,7 @@ All messages support the following placeholders:
 | `%date_end%` | When the punishment expires |
 | `%ip%` / `%ip_address%` | The IP address of the punished player |
 | `%id%` | The punishment ID |
-| `%id_random%` | The punishment ID with random salting (e.g., 4AC6DA) (output configured by Litebans) |
+| `%id_random%` | The punishment ID with random salting (e.g., 4AC6DA) (output configured by LiteBans) |
 | `%active%` | Whether the punishment is active (true/false) |
 | `%permanent%` | Whether the punishment is permanent (true/false) |
 | `%silent%` | Whether the punishment was silent (true/false) |
@@ -93,8 +187,8 @@ Each event type (ban, mute, warn, kick) can be customized with:
 - **embed.footer**: Footer text and icon
 - **embed.fields**: List of information fields with name, value, and inline properties
 
-To remove a notification for a specific event, just delete the block.
-To remove a field (e.g. author) on an embed, just delete the sub-block.
+To remove a notification for a specific event, delete the block.
+To remove a field (e.g. author) on an embed, delete the sub-block.
 
 ### Example Configuration
 
@@ -126,18 +220,10 @@ events:
           inline: false
 ```
 
-## Building
-
-```bash
-mvn clean package
-```
-
-The compiled plugin will be available at `target/LiteBansDiscordBridge-1.0.0.jar`
-
 ## Support
 
 For issues or questions, please open an issue on the GitHub repository.
 
 ## License
 
-This project is provided as-is for use with Velocity and LiteBans.
+This project is provided as-is for use with LiteBans.
