@@ -21,7 +21,7 @@ import java.nio.file.Path;
 @Plugin(
     id = "litebansdiscordbridge",
     name = "LiteBansDiscordBridge",
-    version = "1.0.0", // replaced by CI via sed during release builds
+    version = "2.0.0",
     description = "Sends LiteBans events to Discord webhooks",
     authors = {"colocated"},
     dependencies = { @Dependency(id = "litebans") }
