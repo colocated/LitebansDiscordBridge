@@ -22,13 +22,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       # Java 21 is needed to compile both the default (java8 target) and
       # the modern (java21 target) builds. Java 8 bytecode compiles fine
       # under a Java 21 JDK.
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v4.7.0
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -78,7 +78,7 @@ jobs:
       # Create GitHub Release
       # -----------------------------------------------------------------------
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.3.2
         with:
           tag_name: v${{ inputs.version }}
           name: LiteBansDiscordBridge v${{ inputs.version }}
