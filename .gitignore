@@ -38,3 +38,6 @@ nbdist/
 
 # Windows
 Thumbs.db
+
+# Caliber local state
+.caliber/
