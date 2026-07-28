@@ -24,9 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      # Java 21 is needed to compile both the default (java8 target) and
-      # the modern (java21 target) builds. Java 8 bytecode compiles fine
-      # under a Java 21 JDK.
+      # Java 21 compiles both builds. The default profile passes --release 8, so the
+      # java8 JARs are checked against the Java 8 API, not just stamped with its version;
+      # the verify-bytecode step below confirms that on the shipped artifacts.
       - name: Set up Java 21
         uses: actions/setup-java@v4.7.0
         with:
@@ -46,8 +46,12 @@ jobs:
       # -----------------------------------------------------------------------
       # Java 8 build  (default profile — broadest compatibility, 1.8.8–1.21.x)
       # -----------------------------------------------------------------------
+      # Tests run as part of the package lifecycle — a failing test blocks the release.
       - name: Build Java-8-target JARs
-        run: mvn --no-transfer-progress clean package -DskipTests
+        run: mvn --no-transfer-progress clean package
+
+      - name: Verify Java-8-target JARs contain no newer bytecode
+        run: python3 scripts/verify-bytecode.py 8 */target/LiteBansDiscordBridge-*-${{ inputs.version }}.jar
 
       - name: Collect Java-8-target JARs
         run: |
@@ -63,7 +67,10 @@ jobs:
       # Java 21 build  (modern profile — Java 21+ environments only)
       # -----------------------------------------------------------------------
       - name: Build Java-21-target JARs
-        run: mvn --no-transfer-progress clean package -P modern -DskipTests
+        run: mvn --no-transfer-progress clean package -P modern
+
+      - name: Verify Java-21-target JARs contain no newer bytecode
+        run: python3 scripts/verify-bytecode.py 21 */target/LiteBansDiscordBridge-*-${{ inputs.version }}-modern.jar
 
       - name: Collect Java-21-target JARs
         run: |

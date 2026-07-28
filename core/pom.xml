@@ -32,6 +32,11 @@
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-yaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- Core is NOT shaded — platform modules shade it as part of their fat JAR -->
