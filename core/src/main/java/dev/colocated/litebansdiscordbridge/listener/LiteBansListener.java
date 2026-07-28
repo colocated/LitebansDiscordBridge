@@ -4,7 +4,7 @@ import dev.colocated.litebansdiscordbridge.config.ConfigManager;
 import dev.colocated.litebansdiscordbridge.discord.DiscordEmbed;
 import dev.colocated.litebansdiscordbridge.discord.DiscordWebhookSender;
 import dev.colocated.litebansdiscordbridge.platform.PlatformAdapter;
-import dev.colocated.litebansdiscordbridge.util.PlaceholderReplacer;
+import dev.colocated.litebansdiscordbridge.util.PlaceholderContext;
 import litebans.api.Entry;
 import litebans.api.Events;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -96,23 +96,25 @@ public class LiteBansListener extends Events.Listener {
         CommentedConfigurationNode embedConfig = config.node("embed");
         DiscordEmbed embed = new DiscordEmbed();
 
+        // Resolved once for the whole embed — every apply() below reuses these values
+        PlaceholderContext placeholders = PlaceholderContext.of(entry, platform);
+
         String title = embedConfig.node("title").getString("");
         if (!title.isEmpty()) {
-            embed.setTitle(PlaceholderReplacer.replace(title, entry, platform));
+            embed.setTitle(placeholders.apply(title));
         }
 
         String description = embedConfig.node("description").getString("");
         if (!description.isEmpty()) {
-            embed.setDescription(PlaceholderReplacer.replace(description, entry, platform));
+            embed.setDescription(placeholders.apply(description));
         }
 
         String url = embedConfig.node("url").getString("");
         if (!url.isEmpty()) {
-            embed.setUrl(PlaceholderReplacer.replace(url, entry, platform));
+            embed.setUrl(placeholders.apply(url));
         }
 
-        String colorStr = embedConfig.node("color").getString("#FF0000");
-        embed.setColor(PlaceholderReplacer.parseColor(colorStr));
+        embed.setColor(embedConfig.node("color").getString("#FF0000"));
 
         boolean timestamp = embedConfig.node("timestamp").getBoolean(true);
         if (timestamp) {
@@ -121,9 +123,9 @@ public class LiteBansListener extends Events.Listener {
 
         CommentedConfigurationNode authorNode = embedConfig.node("author");
         if (!authorNode.virtual()) {
-            String authorName     = PlaceholderReplacer.replace(authorNode.node("name").getString(""), entry, platform);
-            String authorUrl      = PlaceholderReplacer.replace(authorNode.node("url").getString(""), entry, platform);
-            String authorIconUrl  = PlaceholderReplacer.replace(authorNode.node("icon-url").getString(""), entry, platform);
+            String authorName     = placeholders.apply(authorNode.node("name").getString(""));
+            String authorUrl      = placeholders.apply(authorNode.node("url").getString(""));
+            String authorIconUrl  = placeholders.apply(authorNode.node("icon-url").getString(""));
             embed.setAuthor(authorName,
                 authorUrl.isEmpty() ? null : authorUrl,
                 authorIconUrl.isEmpty() ? null : authorIconUrl);
@@ -131,20 +133,20 @@ public class LiteBansListener extends Events.Listener {
 
         CommentedConfigurationNode thumbnailNode = embedConfig.node("thumbnail");
         if (!thumbnailNode.virtual()) {
-            String thumbUrl = PlaceholderReplacer.replace(thumbnailNode.node("url").getString(""), entry, platform);
+            String thumbUrl = placeholders.apply(thumbnailNode.node("url").getString(""));
             if (!thumbUrl.isEmpty()) embed.setThumbnail(thumbUrl);
         }
 
         CommentedConfigurationNode imageNode = embedConfig.node("image");
         if (!imageNode.virtual()) {
-            String imgUrl = PlaceholderReplacer.replace(imageNode.node("url").getString(""), entry, platform);
+            String imgUrl = placeholders.apply(imageNode.node("url").getString(""));
             if (!imgUrl.isEmpty()) embed.setImage(imgUrl);
         }
 
         CommentedConfigurationNode footerNode = embedConfig.node("footer");
         if (!footerNode.virtual()) {
-            String footerText    = PlaceholderReplacer.replace(footerNode.node("text").getString(""), entry, platform);
-            String footerIconUrl = PlaceholderReplacer.replace(footerNode.node("icon-url").getString(""), entry, platform);
+            String footerText    = placeholders.apply(footerNode.node("text").getString(""));
+            String footerIconUrl = placeholders.apply(footerNode.node("icon-url").getString(""));
             if (!footerText.isEmpty()) {
                 embed.setFooter(footerText, footerIconUrl.isEmpty() ? null : footerIconUrl);
             }
@@ -153,8 +155,8 @@ public class LiteBansListener extends Events.Listener {
         CommentedConfigurationNode fieldsNode = embedConfig.node("fields");
         if (!fieldsNode.virtual() && fieldsNode.isList()) {
             for (CommentedConfigurationNode fieldNode : fieldsNode.childrenList()) {
-                String fieldName  = PlaceholderReplacer.replace(fieldNode.node("name").getString(""), entry, platform);
-                String fieldValue = PlaceholderReplacer.replace(fieldNode.node("value").getString(""), entry, platform);
+                String fieldName  = placeholders.apply(fieldNode.node("name").getString(""));
+                String fieldValue = placeholders.apply(fieldNode.node("value").getString(""));
                 boolean inline    = fieldNode.node("inline").getBoolean(false);
                 if (!fieldName.isEmpty() && !fieldValue.isEmpty()) {
                     embed.addField(fieldName, fieldValue, inline);
@@ -164,7 +166,7 @@ public class LiteBansListener extends Events.Listener {
 
         String content = config.node("content").getString("");
         if (!content.isEmpty()) {
-            content = PlaceholderReplacer.replace(content, entry, platform);
+            content = placeholders.apply(content);
         }
 
         webhookSender.sendEmbed(webhookUrl, embed, content.isEmpty() ? null : content);

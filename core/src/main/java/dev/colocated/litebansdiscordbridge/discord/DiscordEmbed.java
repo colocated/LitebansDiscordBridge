@@ -40,6 +40,20 @@ public class DiscordEmbed {
         return this;
     }
 
+    /** Accepts a hex string ("#FF0000") or a plain decimal integer; anything else means "no colour". */
+    public DiscordEmbed setColor(String color) {
+        if (color == null || color.isEmpty()) {
+            return setColor(0);
+        }
+        try {
+            return setColor(color.startsWith("#")
+                ? Integer.parseInt(color.substring(1), 16)
+                : Integer.parseInt(color));
+        } catch (NumberFormatException e) {
+            return setColor(0);
+        }
+    }
+
     public DiscordEmbed setTimestamp(boolean enabled) {
         if (enabled) {
             this.timestamp = Instant.now().toString();
