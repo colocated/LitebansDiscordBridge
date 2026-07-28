@@ -22,13 +22,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
 
       # Java 21 compiles both builds. The default profile passes --release 8, so the
       # java8 JARs are checked against the Java 8 API, not just stamped with its version;
       # the verify-bytecode step below confirms that on the shipped artifacts.
       - name: Set up Java 21
-        uses: actions/setup-java@v4.7.0
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -41,6 +41,10 @@ jobs:
         run: |
           mvn --no-transfer-progress versions:set -DnewVersion=${{ inputs.version }} -DgenerateBackupPoms=false
           sed -i 's/version = "[^"]*", \/\/ replaced by CI via sed during release builds/version = "${{ inputs.version }}", \/\/ replaced by CI via sed during release builds/' \
+            velocity/src/main/java/dev/colocated/litebansdiscordbridge/velocity/LiteBansDiscordBridgeVelocity.java
+          # If that marker comment ever drifts, sed no-ops silently and we ship a Velocity
+          # plugin reporting the wrong version — so confirm the stamp actually landed.
+          grep -q 'version = "${{ inputs.version }}",' \
             velocity/src/main/java/dev/colocated/litebansdiscordbridge/velocity/LiteBansDiscordBridgeVelocity.java
 
       # -----------------------------------------------------------------------
@@ -85,7 +89,7 @@ jobs:
       # Create GitHub Release
       # -----------------------------------------------------------------------
       - name: Create Release
-        uses: softprops/action-gh-release@v2.3.2
+        uses: softprops/action-gh-release@v3.0.2
         with:
           tag_name: v${{ inputs.version }}
           name: LiteBansDiscordBridge v${{ inputs.version }}
