@@ -5,17 +5,35 @@ Maven multi-module plugin bridging LiteBans punishment events to Discord webhook
 ## Build
 
 ```bash
-# Java 8 JARs (broadest compatibility — default)
+# Java 8 JARs (broadest compatibility — default). Runs the test suite first.
 mvn clean package
 
 # Java 21 JARs
 mvn clean package -P modern
+
+# Tests only
+mvn test
+
+# Confirm shipped JARs contain nothing newer than the target release
+python3 scripts/verify-bytecode.py 8 */target/LiteBansDiscordBridge-*-{version}.jar
 ```
 
 Output JARs after build:
 - `bukkit/target/LiteBansDiscordBridge-bukkit-{version}.jar`
 - `bungeecord/target/LiteBansDiscordBridge-bungeecord-{version}.jar`
 - `velocity/target/LiteBansDiscordBridge-velocity-{version}.jar`
+
+Both profiles build on a JDK 21 toolchain; only the bytecode target differs. On JDK 9+ the
+`release-flag` profile (auto-activated) passes `--release`, so the default build is compiled
+against the **Java 8 API** — a `List.of()` or `String.isBlank()` is a compile error there, not a
+runtime `NoSuchMethodError` on an old server.
+
+## Tests
+
+JUnit 5 in `core/src/test/java`, run automatically before `package`. LiteBans is stubbed via
+`Database.setInstance()` — see `support/TestDatabase`, `support/TestEntry`, `support/TestPlatform`.
+`DefaultConfigTest` cross-checks `config.yml` against `PlaceholderContext.KNOWN_PLACEHOLDERS` in
+both directions, so a new placeholder must be documented and a documented one must resolve.
 
 ## Architecture
 
@@ -32,13 +50,14 @@ Modules: `core` (platform-agnostic) → `bukkit`, `bungeecord`, `velocity` (plat
 - `config.ConfigManager` — loads/reloads `config.yml` via Configurate 4 (`YamlConfigurationLoader`)
 - `listener.LiteBansListener` — handles `entryAdded`/`entryRemoved` from `litebans.api.Events`
 - `discord.DiscordWebhookSender` — async OkHttp3 POST; call `shutdown()` on plugin disable
-- `discord.DiscordEmbed` — fluent builder → Gson `JsonObject` via `toJson()`
-- `util.PlaceholderReplacer` — resolves `%player%`, `%executor%`, `%reason%`, etc. from `litebans.api.Entry`
+- `discord.DiscordEmbed` — fluent builder → Gson `JsonObject` via `toJson()`; `setColor(String)` parses `#RRGGBB` or decimal
+- `util.PlaceholderContext` — all placeholder values for one `litebans.api.Entry`, built once per event and reused for every part of the embed; `apply(template)` substitutes in a single pass
+- `util.PlayerNameResolver` — UUID → username: online player, then `litebans.api.Database.getPlayerName()` (covers offline players), then the UUID; cached with a TTL
 - `platform.PlatformAdapter` — interface each platform implements for logging and `getDataDirectory()`
 
 ## Conventions
 
-- **Java 8 source/target** by default; Java 21 via `-P modern` profile in root `pom.xml`
+- **Java 8 target** by default (via `--release 8` on a JDK 9+ toolchain); Java 21 via `-P modern` profile in root `pom.xml`
 - Shaded deps relocated under `dev.colocated.litebansdiscordbridge.libs.*` (okhttp3, gson, configurate, snakeyaml)
 - SnakeYAML pinned to `1.33` in `pom.xml` `<dependencyManagement>` to avoid `NoSuchMethodError` with Configurate 4.1.2
 - Event types in `config.yml`: `ban`, `mute`, `warn`, `kick`, `unban`, `unmute` — keyed as `events.<type>`
@@ -62,9 +81,13 @@ Modules: `core` (platform-agnostic) → `bukkit`, `bungeecord`, `velocity` (plat
 
 ## Adding a New Placeholder
 
-In `PlaceholderReplacer.replace()`:
-
-```java
-text = text.replace("%new_placeholder%",
-    entry.getSomeField() != null ? entry.getSomeField() : "default");
-```
+1. Add the key to `KNOWN_PLACEHOLDERS` in `PlaceholderContext`
+2. Resolve it in the `PlaceholderContext` constructor:
+   ```java
+   put("new_placeholder", entry.getSomeField(), "default");
+   ```
+   `put` falls back when the value is null *or* empty, so `%placeholder%` never renders as `null`.
+   For anything expensive (a database or network lookup), resolve it lazily like `playerName()`
+   instead — the constructor runs for every event, whether or not the config uses the placeholder.
+3. Document it in the placeholder list at the top of `core/src/main/resources/config.yml` —
+   `DefaultConfigTest` fails if a known placeholder is undocumented, or a documented one is unknown
