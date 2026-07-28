@@ -1,5 +1,6 @@
 package dev.colocated.litebansdiscordbridge.config;
 
+import dev.colocated.litebansdiscordbridge.util.PlayerNameResolver;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
@@ -38,6 +39,7 @@ public class ConfigManager {
 
     public void reload() throws IOException {
         load();
+        PlayerNameResolver.clearCache();
     }
 
     private void createDefaultConfig() throws IOException {
